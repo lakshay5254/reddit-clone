@@ -4,10 +4,16 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lakshay.redditclone.dto.AuthenticationResponse;
+import com.lakshay.redditclone.dto.LoginRequest;
 import com.lakshay.redditclone.dto.RegisterRequest;
 import com.lakshay.redditclone.exception.SpringRedditException;
 import com.lakshay.redditclone.model.NotificationEmail;
@@ -15,6 +21,7 @@ import com.lakshay.redditclone.model.User;
 import com.lakshay.redditclone.model.VerificationToken;
 import com.lakshay.redditclone.repository.UserRepository;
 import com.lakshay.redditclone.repository.VerificationTokenRepository;
+import com.lakshay.redditclone.security.JwtProvider;
 
 import lombok.AllArgsConstructor;
 
@@ -35,8 +42,9 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final UserRepository userRepository;
 	private final VerificationTokenRepository verificationTokenRepository;
-	private final MailService mailService; // 
-	
+	private final MailService mailService; 
+	private final AuthenticationManager authenticationManager; //interface
+	private final JwtProvider jwtProvider;
 	
 	@Transactional  // to follow rules of db transactions
 	public void signup(RegisterRequest registerRequest) {
@@ -81,6 +89,21 @@ public class AuthService {
 		User user=userRepository.findByUsername(username).orElseThrow(()->new SpringRedditException("UserName : "+username+" not found"));
 		user.setEnabled(true); //save in model
 		userRepository.save(user); //save or update record in db
+	}
+
+
+	public AuthenticationResponse login(LoginRequest loginRequest) {  //logic to authenticate user
+		// uses authentication manager to perform login so autowire it,,as it is interface so we need to specify which bean to create as there are multiple implementations of it, create inside security config
+		// when we autowire AM spring finds that bean and inject in our class
+		Authentication authenticate=authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),loginRequest.getPassword())); //pass username pass in login request object as a constructor arguments
+		//to create jwt tokens add dependecy jjwt-api,jwwt-impl, jjwt-jackson and create key handling class 
+		// storing authentication object inside security context
+		SecurityContextHolder.getContext().setAuthentication(authenticate);
+		//to check if user is logged in or not such check for authentication object inside security context
+		String token= jwtProvider.generateToken(authenticate);
+		// now we can send this token back to user, to send it we will use DTO authentication response class
+		return new AuthenticationResponse(token,loginRequest.getUsername());
+		
 	}
 
 }
