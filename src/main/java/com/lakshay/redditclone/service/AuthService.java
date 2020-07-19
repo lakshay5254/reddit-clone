@@ -29,6 +29,7 @@ import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor  // this will autowire all  final fields using constructor
+@Transactional
 public class AuthService {
 	
 	/*
@@ -46,7 +47,7 @@ public class AuthService {
 	private final AuthenticationManager authenticationManager; //interface
 	private final JwtProvider jwtProvider;
 	
-	@Transactional  // to follow rules of db transactions
+	@Transactional(readOnly = true) // to follow rules of db transactions
 	public void signup(RegisterRequest registerRequest) {
 		User user =new  User();
 		user.setUsername(registerRequest.getUsername()); //mapping user entity or saving data in db with data entered by user that is stored inside registerRequest
@@ -83,7 +84,6 @@ public class AuthService {
 		fetchUserAndEnable(verificationToken.get());
 	}
 
-	@Transactional  // whenever we communicate with db we use transactional
 	private void fetchUserAndEnable(VerificationToken verificationToken) {
 		String username=verificationToken.getUser().getUsername();
 		User user=userRepository.findByUsername(username).orElseThrow(()->new SpringRedditException("UserName : "+username+" not found"));

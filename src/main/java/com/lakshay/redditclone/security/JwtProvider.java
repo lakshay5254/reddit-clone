@@ -13,12 +13,14 @@ import java.io.InputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
 
+
+
 @Service
 public class JwtProvider {
 	
 	 private KeyStore keyStore;
-	    @Value("${jwt.expiration.time}")
-	    private Long jwtExpirationInMillis;
+	    
+	    
 
 	    @PostConstruct
 	    public void init() {  //initializing the key
@@ -27,7 +29,7 @@ public class JwtProvider {
 	            InputStream resourceAsStream = getClass().getResourceAsStream("/springblog.jks"); //getting input stream from keystore file
 	            keyStore.load(resourceAsStream, "secret".toCharArray()); //provde input stream with password of keystore, here pass = "secret" 
 	        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {  
-	            throw new SpringRedditException("Exception occurred while loading keystore");
+	            throw new SpringRedditException("Exception occurred while loading keystore",e);
 	        }
 
 	    }
@@ -45,7 +47,7 @@ public class JwtProvider {
         try {
             return (PrivateKey) keyStore.getKey("springblog", "secret".toCharArray()); //to read key(alias of keystore, password)
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-            throw new SpringRedditException("Exception occured while retrieving public key from keystore");
+            throw new SpringRedditException("Exception occured while retrieving public key from keystore",e);
         }
     }
 

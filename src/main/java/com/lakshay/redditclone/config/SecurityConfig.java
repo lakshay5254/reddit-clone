@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.AllArgsConstructor;
 
 
+
 // contains seciroty config of our whole application
 @EnableWebSecurity //enables web security module, sprin security startup dependency
 @AllArgsConstructor
