@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lakshay.redditclone.dto.AuthenticationResponse;
+import com.lakshay.redditclone.dto.LoginRequest;
 import com.lakshay.redditclone.dto.RegisterRequest;
 import com.lakshay.redditclone.service.AuthService;
 
@@ -35,6 +37,11 @@ public class AuthController {
 	public ResponseEntity<String> verifyAccount(@PathVariable String token){ // as we are passing data in a variable so to grab it we using path variable
 		authService.verifyAccount(token);
 		return new ResponseEntity<>("Account activated succefully",HttpStatus.OK);
+	}
+	
+	@PostMapping("/login")
+	public AuthenticationResponse login(@RequestBody LoginRequest loginRequest) {
+		return authService.login(loginRequest);  //on login request use login method to authenticate user
 	}
 
 }
