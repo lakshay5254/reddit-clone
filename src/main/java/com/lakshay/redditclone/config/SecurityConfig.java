@@ -2,6 +2,7 @@ package com.lakshay.redditclone.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -11,6 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.lakshay.redditclone.security.JwtAuthenticationFilter;
 
 import lombok.AllArgsConstructor;
 
@@ -22,6 +26,8 @@ import lombok.AllArgsConstructor;
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	
 	private final UserDetailsService userDetailsService; //its Dto that loads user data from different sources like from db
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	
 	
 	@Bean(BeanIds.AUTHENTICATION_MANAGER)
 	@Override
@@ -37,8 +43,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 							.authorizeRequests() // allow all authrization requests that starts with /api/auth/
 							.antMatchers("/api/auth/**")  //any other request that doest match must be authenticated or checked  
 							.permitAll()
+							.antMatchers(HttpMethod.GET,"/api/subreddit")//allow all requests on /api/subreddits
+							.permitAll()
 							.anyRequest()
 							.authenticated();
+		//so spring security will know about our jwt authentication filter class so now spring will check for jwt token before trying username pass scheme
+		httpSecurity.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 	
 	// making authentication manager
