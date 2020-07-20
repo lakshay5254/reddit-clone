@@ -1,5 +1,5 @@
 package com.lakshay.redditclone.controller;
-
+//we should never write our business logic in our controller, it just recieves requests from the client and move them to service layer
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
