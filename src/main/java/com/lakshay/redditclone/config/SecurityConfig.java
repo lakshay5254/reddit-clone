@@ -63,5 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 		return new BCryptPasswordEncoder(); // whenever we autowire it we get object of type Bcry...
 	}
 	
+	
+	
  
 }
