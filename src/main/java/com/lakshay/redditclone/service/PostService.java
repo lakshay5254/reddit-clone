@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -35,13 +36,13 @@ public class PostService {
     private final PostRepository postRepository;
 
 
-    public Post save(PostRequest postRequest) {
+    public void save(PostRequest postRequest) {
         // mapping from postRequest to post entity created in mapper
         //retreiving subreddit from repository
         Subreddit subreddit=subredditRepository.findByName(postRequest.getSubredditName()).orElseThrow(()->new SubredditNotFoundException(postRequest.getSubredditName()));
         User currentUser = authService.getCurrentUser();// getting user details
+        postRepository.save(postMapper.map(postRequest,subreddit,currentUser));
 
-        return postMapper.map(postRequest,subreddit,currentUser);
     }
 
     @Transactional(readOnly = true)

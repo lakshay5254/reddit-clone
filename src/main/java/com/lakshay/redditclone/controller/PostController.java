@@ -25,7 +25,7 @@ public class PostController {
         return new ResponseEntity<>(HttpStatus.CREATED); //for creating a resourse in REST we should return httpstatus= 201 means created
     }
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<List<PostResponse>> getAllPosts() {
         return status(HttpStatus.OK).body(postService.getAllPosts());  //status= ok = 200
     }
