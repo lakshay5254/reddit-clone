@@ -13,7 +13,8 @@ public interface PostMapper {
 
     @Mapping(target = "createdDate", expression = "java(java.time.Instant.now())") //Post.createdDate = current time
     @Mapping(target = "description", source = "postRequest.description") //description = postRequest.description
-    //creating Post object from postreq dto, subreddit and user entity
+    @Mapping(target = "userName", source = "user.username")
+        //creating Post object from postreq dto, subreddit and user entity
     Post map(PostRequest postRequest, Subreddit subreddit, User user);
 
     @Mapping(target = "id", source = "postId") //postres.id=post.postid
