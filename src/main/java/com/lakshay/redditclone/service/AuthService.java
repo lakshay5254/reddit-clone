@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.lakshay.redditclone.dto.RefreshTokenRequest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -48,6 +49,9 @@ public class AuthService {
 	private final AuthenticationManager authenticationManager; //interface
 	private final JwtProvider jwtProvider;
 
+	private final RefreshTokenService refreshTokenService;
+	
+	@Transactional(readOnly = true) // to follow rules of db transactions
 
 	public void signup(RegisterRequest registerRequest) {
 
@@ -104,9 +108,31 @@ public class AuthService {
 		//to check if user is logged in or not such check for authentication object inside security context
 		String token = jwtProvider.generateToken(authenticate);
 		// now we can send this token back to user, to send it we will use DTO authentication response class
-		return new AuthenticationResponse(token, loginRequest.getUsername());
 
+		return AuthenticationResponse.builder()
+				.authenticationToken(token)
+				.refreshToken(refreshTokenService.generateRefreshToken().getToken())
+				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis())) //getting expiration time from jwtprovider then calculating instant from timestamp
+				.username(loginRequest.getUsername())
+				.build(); // when login we get one  refresh token, jwt token, expiration date
+
+		
 	}
+
+	public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+		//refresh token esrvice class responsible for create delete update refresh tokens
+		refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken()); //if not validate then runtime exception
+		String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername()); //as when jwt expires no user info presnt in security context  to generate token we use another method  rathen then generateToken()
+		return AuthenticationResponse.builder()
+				.authenticationToken(token)
+				.refreshToken(refreshTokenRequest.getRefreshToken())
+				.expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+				.username(refreshTokenRequest.getUsername())
+				.build();
+	}
+
+
+	
 
 	@Transactional(readOnly = true)
 	public User getCurrentUser() {
@@ -117,3 +143,4 @@ public class AuthService {
 	}
 
 }
+

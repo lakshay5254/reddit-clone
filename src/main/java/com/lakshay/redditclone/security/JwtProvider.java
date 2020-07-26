@@ -7,26 +7,34 @@ import io.jsonwebtoken.Claims;
 
 import io.jsonwebtoken.Jwts;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.xml.crypto.Data;
 
 import static io.jsonwebtoken.Jwts.parser;
+import static java.util.Date.from;
+
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
-
+import java.time.Instant;
+import java.util.Date;
 
 
 @Service
 public class JwtProvider {
 	
 	 private KeyStore keyStore;
-	    
+	 //for refresh token setting expiration time , set this in properties
+	@Value("${jwt.expiration.time}")
+	private Long jwtExpirationInMillis;
 	    
 
 	    @PostConstruct
@@ -46,10 +54,22 @@ public class JwtProvider {
 		User principle=(User)authentication.getPrincipal(); //cast to userdetails.User
 		return Jwts.builder() //using Jwts class to create jwt token in string 
 				.setSubject(principle.getUsername()) //setting username as subject
-				.signWith(getPrivateKey()) //to sign token we are providing private key of the keystore, we are using asymmetric encryption of jwt private public key 
+				.setIssuedAt(from(Instant.now()))
+				.signWith(getPrivateKey()) //to sign token we are providing private key of the keystore, we are using asymmetric encryption of jwt private public key
+				.setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis))) //converting long to an instant object then use date.from to convert it into date object
 				.compact();
 	}
-	
+
+	// jwt regenerate method with subject or with username
+	public String generateTokenWithUserName(String username) {
+		return Jwts.builder()
+				.setSubject(username)
+				.setIssuedAt(from(Instant.now()))
+				.signWith(getPrivateKey())
+				.setExpiration(java.sql.Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
+				.compact();
+	}
+
 	private PrivateKey getPrivateKey() { //method to pass keys  
         try {
             return (PrivateKey) keyStore.getKey("springblog", "secret".toCharArray()); //to read key(alias of keystore, password)
@@ -84,5 +104,9 @@ public class JwtProvider {
 
 		return claims.getSubject();  //we set subject as username
     }
+
+    public Long getJwtExpirationInMillis(){
+	    	return jwtExpirationInMillis;
+	}
 
 }
