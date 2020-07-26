@@ -39,8 +39,9 @@ public class PostService {
         // mapping from postRequest to post entity created in mapper
         //retreiving subreddit from repository
         Subreddit subreddit=subredditRepository.findByName(postRequest.getSubredditName()).orElseThrow(()->new SubredditNotFoundException(postRequest.getSubredditName()));
-        User currentUser = authService.getCurrentUser();// getting user details
-        postRepository.save(postMapper.map(postRequest,subreddit,currentUser));
+
+        postRepository.save(postMapper.map(postRequest,subreddit,authService.getCurrentUser()));
+
     }
 
     @Transactional(readOnly = true)

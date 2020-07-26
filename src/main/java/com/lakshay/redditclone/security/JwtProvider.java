@@ -2,9 +2,11 @@ package com.lakshay.redditclone.security;
 
 import com.lakshay.redditclone.exception.SpringRedditException;
 
-import antlr.Parser;
+
 import io.jsonwebtoken.Claims;
+
 import io.jsonwebtoken.Jwts;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
@@ -80,7 +82,7 @@ public class JwtProvider {
                 .parseClaimsJws(token)
                 .getBody();
 
-        return claims.getSubject();  //we set subject as username
+		return claims.getSubject();  //we set subject as username
     }
 
 }

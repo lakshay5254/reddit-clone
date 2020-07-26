@@ -27,8 +27,9 @@ public class SubredditService {
 	
 	
 	@Transactional
-	public SubredditDto save(SubredditDto subredditDto) {
+	public Object save(SubredditDto subredditDto) {
 		//mapping information from dto to subreddit entity
+
 		Subreddit save=subredditRepository.save(subredditMapper.mapDtoToSubreddit(subredditDto));
 		subredditDto.setId(save.getId()); // setting id in dto
 		return subredditDto;

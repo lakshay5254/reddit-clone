@@ -25,6 +25,8 @@ public interface SubredditMapper {
     //for inverse mapping or mapping dto to entity
     @InheritInverseConfiguration
     @Mapping(target="posts",ignore=true) //ignoring posts field as we will set it when we will be creating posts
+    @Mapping(target = "createdDate", expression = "java(java.time.Instant.now())")
+
     Subreddit mapDtoToSubreddit(SubredditDto subredditDto);
 } // now we can replace builder methods with mapper methods 
 
