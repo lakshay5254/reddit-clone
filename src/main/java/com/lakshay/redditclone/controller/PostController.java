@@ -13,7 +13,7 @@ import java.util.List;
 import static org.springframework.http.ResponseEntity.status;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api/posts/")
 @AllArgsConstructor
 public class PostController {
 
@@ -35,14 +35,14 @@ public class PostController {
         return status(HttpStatus.OK).body(postService.getPost(id));
     }
 
-    @GetMapping("by-subreddit/{id}") //all posts under a subreddit
-    public ResponseEntity<List<PostResponse>> getPostsBySubreddit(Long id) {
+    @GetMapping("bysubreddit/{id}") //all posts under a subreddit
+    public ResponseEntity<List<PostResponse>> getPostsBySubreddit(@PathVariable Long id) {
         return status(HttpStatus.OK).body(postService.getPostsBySubreddit(id));
     }
 
-    @GetMapping("by-user/{name}") //by specific user
-    public ResponseEntity<List<PostResponse>> getPostsByUsername(String username) {
-        return status(HttpStatus.OK).body(postService.getPostsByUsername(username));
+    @GetMapping("byuser/{name}") //by specific user
+    public ResponseEntity<List<PostResponse>> getPostsByUsername(@PathVariable String name) {
+        return status(HttpStatus.OK).body(postService.getPostsByUsername(name));
     }
 
 }

@@ -45,7 +45,7 @@ public class CommentService {
         mailService.sendMail(new NotificationEmail(user.getUsername() + " Commented on your post", user.getEmail(), message));
     }
 
-    public List<CommentsDto> getllCommentsForPost(Long postId) {
+    public List<CommentsDto> getAllCommentsForPost(Long postId) {
         Post post=postRepository.findById(postId).orElseThrow(()->new PostNotFoundException(postId.toString()));//finding post
         return commentRepository.findByPost(post).stream().map(commentMapper::mapToDto).collect(toList()); //finding comments associated with post
     }

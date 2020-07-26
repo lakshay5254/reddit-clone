@@ -14,7 +14,6 @@ import javax.validation.constraints.NotEmpty;
 import java.time.Instant;
 
 import static javax.persistence.GenerationType.IDENTITY;
-import static javax.persistence.GenerationType.SEQUENCE;
 
 @Data
 @AllArgsConstructor

@@ -32,6 +32,7 @@ public class Post {
     @Nullable
     @Lob  // used to store large chunks of data in db
     private String description;
+    @Column(name = "voteCount")
     private Integer voteCount = 0;
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "userId")

@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -58,7 +57,7 @@ public class PostService {
                 .collect(toList());
     }
 
-    @Transactional(readOnly = true)
+    //@Transactional(readOnly = true)
     public List<PostResponse> getPostsBySubreddit(Long subredditId) {
         Subreddit subreddit = subredditRepository.findById(subredditId)
                 .orElseThrow(() -> new SubredditNotFoundException(subredditId.toString()));

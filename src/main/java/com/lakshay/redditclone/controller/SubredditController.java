@@ -17,17 +17,17 @@ import com.lakshay.redditclone.service.SubredditService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-//api to create and read subreddits 
+
 @RestController
 @RequestMapping("/api/subreddit")
 @AllArgsConstructor
 @Slf4j
 public class SubredditController {
 	
-	private SubredditService subredditService; 
+    private final SubredditService subredditService;
 	
 	 @PostMapping
-	 public ResponseEntity<SubredditDto> createSubreddit(@RequestBody SubredditDto subredditDto) {
+	 public ResponseEntity<Object> createSubreddit(@RequestBody SubredditDto subredditDto) {
 	        return ResponseEntity.status(HttpStatus.CREATED)
 	                .body(subredditService.save(subredditDto)); //save will return dto object
 	 }

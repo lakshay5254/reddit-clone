@@ -39,7 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	
 	@Override
 	public void configure(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.cors().and()
+		httpSecurity
 							.csrf().disable() //occur when session and cookies used to authenticate,to secure our app from cross site scripting
 							.authorizeRequests() // allow all authrization requests that starts with /api/auth/
 							.antMatchers("/api/auth/**")  //any other request that doest match must be authenticated or checked  

@@ -48,13 +48,15 @@ public class AuthService {
 	private final AuthenticationManager authenticationManager; //interface
 	private final JwtProvider jwtProvider;
 
-	@Transactional(readOnly = true) // to follow rules of db transactions
+
 	public void signup(RegisterRequest registerRequest) {
+
 		User user = new User();
+
 		user.setUsername(registerRequest.getUsername()); //mapping user entity or saving data in db with data entered by user that is stored inside registerRequest
 		user.setEmail(registerRequest.getEmail());
-		user.setPassword(passwordEncoder.encode(registerRequest.getPassword())); //PE present in authserive 
-		user.setCreated(Instant.now()); //instant.now used to get current time 
+		user.setPassword(passwordEncoder.encode(registerRequest.getPassword())); //PE present in authserive
+		user.setCreated(Instant.now()); //instant.now used to get current time
 		user.setEnabled(false); //disable user till authentication
 		userRepository.save(user);
 
@@ -81,8 +83,7 @@ public class AuthService {
 
 	public void verifyAccount(String token) {
 		Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token); // checking token exist or not in repository
-		verificationToken.orElseThrow(() -> new SpringRedditException("Invalid Token")); // if token is not valid
-		fetchUserAndEnable(verificationToken.get());
+		fetchUserAndEnable(verificationToken.orElseThrow(() -> new SpringRedditException("Invalid Token")));
 	}
 
 	private void fetchUserAndEnable(VerificationToken verificationToken) {

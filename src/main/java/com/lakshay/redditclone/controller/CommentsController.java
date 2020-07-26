@@ -3,12 +3,13 @@ package com.lakshay.redditclone.controller;
 import com.lakshay.redditclone.dto.CommentsDto;
 import com.lakshay.redditclone.service.CommentService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
@@ -21,12 +22,12 @@ public class CommentsController {
     public ResponseEntity<Void> createComment(@RequestBody CommentsDto commentsDto){
         //convert to comment entity and save to db in service
         commentService.save(commentsDto);
-        return new ResponseEntity<>(HttpStatus.CREATED); //sending response back to client
+        return new ResponseEntity<>(CREATED);
     }
 
     @GetMapping("/by-post/{postId}")
     public ResponseEntity<List<CommentsDto>> getAllCommentsForPost(@PathVariable Long postId){
-        return ResponseEntity.status(OK).body(commentService.getllCommentsForPost(postId));
+        return ResponseEntity.status(OK).body(commentService.getAllCommentsForPost(postId));
     }
 
     @GetMapping("/by-user/{userName}")
