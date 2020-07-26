@@ -39,6 +39,7 @@ public class PostService {
         // mapping from postRequest to post entity created in mapper
         //retreiving subreddit from repository
         Subreddit subreddit=subredditRepository.findByName(postRequest.getSubredditName()).orElseThrow(()->new SubredditNotFoundException(postRequest.getSubredditName()));
+
         postRepository.save(postMapper.map(postRequest,subreddit,authService.getCurrentUser()));
 
     }
@@ -57,7 +58,7 @@ public class PostService {
                 .collect(toList());
     }
 
-    //@Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<PostResponse> getPostsBySubreddit(Long subredditId) {
         Subreddit subreddit = subredditRepository.findById(subredditId)
                 .orElseThrow(() -> new SubredditNotFoundException(subredditId.toString()));
