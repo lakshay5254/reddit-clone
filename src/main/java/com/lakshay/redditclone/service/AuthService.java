@@ -9,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,63 +33,66 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor  // this will autowire all  final fields using constructor
 @Transactional
 public class AuthService {
-	
+
 	/*
-	 * @Autowired 
+	 * @Autowired
 	 * private PasswordEncoder passwordEncoder;
 	 * @Autowired// autowiring user repository for saving user in db private
 	 * private UserRepository userRepository;
-	 */ 
+	 */
 	//this is field injection but we should use construction injection always 
-	
+
 	private final PasswordEncoder passwordEncoder;
 	private final UserRepository userRepository;
 	private final VerificationTokenRepository verificationTokenRepository;
-	private final MailService mailService; 
+	private final MailService mailService;
 	private final AuthenticationManager authenticationManager; //interface
 	private final JwtProvider jwtProvider;
+
 	private final RefreshTokenService refreshTokenService;
 	
 	@Transactional(readOnly = true) // to follow rules of db transactions
+
 	public void signup(RegisterRequest registerRequest) {
-		User user =new  User();
+
+		User user = new User();
+
 		user.setUsername(registerRequest.getUsername()); //mapping user entity or saving data in db with data entered by user that is stored inside registerRequest
 		user.setEmail(registerRequest.getEmail());
-		user.setPassword(passwordEncoder.encode(registerRequest.getPassword())); //PE present in authserive 
-		user.setCreated(Instant.now()); //instant.now used to get current time 
+		user.setPassword(passwordEncoder.encode(registerRequest.getPassword())); //PE present in authserive
+		user.setCreated(Instant.now()); //instant.now used to get current time
 		user.setEnabled(false); //disable user till authentication
-		userRepository.save(user); 
-		
+		userRepository.save(user);
+
 		//email verification
-		String token=generateVerificationToken(user);
+		String token = generateVerificationToken(user);
 		// now to send these token to user email for verification we need to send html template with it to create it we can use thymleaf add dependecny
 		//then create template
-		mailService.sendMail(new NotificationEmail("Please Activate your account", user.getEmail(),"Thank you for signing up to Spring Reddit, " +
-                "please click on the below url to activate your account : " +
-                "http://localhost:8080/api/auth/accountVerification/" + token));  //(subject, recipient, body)
+		mailService.sendMail(new NotificationEmail("Please Activate your account", user.getEmail(), "Thank you for signing up to Spring Reddit, " +
+				"please click on the below url to activate your account : " +
+				"http://localhost:8080/api/auth/accountVerification/" + token));  //(subject, recipient, body)
 	}
- 
+
 
 	private String generateVerificationToken(User user) {
-		String token=UUID.randomUUID().toString(); //128bit 
-		VerificationToken verificationToken=new VerificationToken(); //saving in entity
+		String token = UUID.randomUUID().toString(); //128bit
+		VerificationToken verificationToken = new VerificationToken(); //saving in entity
 		verificationToken.setToken(token);
 		verificationToken.setUser(user);
-		
+
 		verificationTokenRepository.save(verificationToken); //saving token in db
 		return token;
 	}
 
 
 	public void verifyAccount(String token) {
-		Optional<VerificationToken> verificationToken=verificationTokenRepository.findByToken(token); // checking token exist or not in repository
-		verificationToken.orElseThrow(()->new SpringRedditException("Invalid Token")); // if token is not valid
-		fetchUserAndEnable(verificationToken.get());
+		Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token); // checking token exist or not in repository
+		fetchUserAndEnable(verificationToken.orElseThrow(() -> new SpringRedditException("Invalid Token")));
 	}
 
 	private void fetchUserAndEnable(VerificationToken verificationToken) {
-		String username=verificationToken.getUser().getUsername();
-		User user=userRepository.findByUsername(username).orElseThrow(()->new SpringRedditException("UserName : "+username+" not found"));
+		String username = verificationToken.getUser().getUsername();
+		User user = userRepository.findByUsername(username).orElseThrow(() -> new SpringRedditException("UserName : " + username + " not found"));
 		user.setEnabled(true); //save in model
 		userRepository.save(user); //save or update record in db
 	}
@@ -97,13 +101,14 @@ public class AuthService {
 	public AuthenticationResponse login(LoginRequest loginRequest) {  //logic to authenticate user
 		// uses authentication manager to perform login so autowire it,,as it is interface so we need to specify which bean to create as there are multiple implementations of it, create inside security config
 		// when we autowire AM spring finds that bean and inject in our class
-		Authentication authenticate=authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),loginRequest.getPassword())); //pass username pass in login request object as a constructor arguments
+		Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())); //pass username pass in login request object as a constructor arguments
 		//to create jwt tokens add dependecy jjwt-api,jwwt-impl, jjwt-jackson and create key handling class 
 		// storing authentication object inside security context
 		SecurityContextHolder.getContext().setAuthentication(authenticate);
 		//to check if user is logged in or not such check for authentication object inside security context
-		String token= jwtProvider.generateToken(authenticate);
+		String token = jwtProvider.generateToken(authenticate);
 		// now we can send this token back to user, to send it we will use DTO authentication response class
+
 		return AuthenticationResponse.builder()
 				.authenticationToken(token)
 				.refreshToken(refreshTokenService.generateRefreshToken().getToken())
@@ -125,4 +130,17 @@ public class AuthService {
 				.username(refreshTokenRequest.getUsername())
 				.build();
 	}
+
+
+	
+
+	@Transactional(readOnly = true)
+	public User getCurrentUser() {
+		org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.
+				getContext().getAuthentication().getPrincipal();
+		return userRepository.findByUsername(principal.getUsername())
+				.orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
+	}
+
 }
+

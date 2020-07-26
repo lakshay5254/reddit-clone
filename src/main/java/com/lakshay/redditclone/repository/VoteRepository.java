@@ -10,5 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface VoteRepository extends JpaRepository<Vote, Long> {
+    //find vote by post and user info then order those result by vote id in desc order and get top one
+    //getting recent vote by a user on a post
     Optional<Vote> findTopByPostAndUserOrderByVoteIdDesc(Post post, User currentUser);
 }

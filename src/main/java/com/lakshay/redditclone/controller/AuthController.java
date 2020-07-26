@@ -18,6 +18,7 @@ import com.lakshay.redditclone.service.AuthService;
 
 import lombok.AllArgsConstructor;
 
+
 import javax.validation.Valid;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -37,13 +38,17 @@ public class AuthController {
 	//@RequestBody : Annotation indicating a method parameter should be bound to the body of the HTTP request. @ResponseBody annotation can be put on a method and indicates that the return type should be written straight to the HTTP response body (and not placed in a Model, or interpreted as a view name)
 		
 		authService.signup(registerRequest); //passing user details to service
-		return new ResponseEntity<>("User Registration successfull", OK); //if registration successfull
+
+		return new ResponseEntity<>("User Registration successful", OK); //if registration successfull
+
 	}
 	
 	@GetMapping("accountVerification/{token}")
 	public ResponseEntity<String> verifyAccount(@PathVariable String token){ // as we are passing data in a variable so to grab it we using path variable
 		authService.verifyAccount(token);
-		return new ResponseEntity<>("Account activated succefully", OK);
+
+        return new ResponseEntity<>("Account Activated Successfully", OK);
+
 	}
 	
 	@PostMapping("/login")
