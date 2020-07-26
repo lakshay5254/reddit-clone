@@ -56,12 +56,12 @@ public class AuthController {
 		return authService.login(loginRequest);  //on login request use login method to authenticate user
 	}
 
-	@PostMapping("/refresh/token")
+	@PostMapping("/refresh/token") //using refresh token to regenerate expired jwt token
 	public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) { //valid= throw error if null or emtpy token
 		return authService.refreshToken(refreshTokenRequest);
 	}
 
-	@PostMapping("/logout")
+	@PostMapping("/logout") //remove refresh token
 	public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
 		refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken());
 		return ResponseEntity.status(OK).body("Refresh Token Deleted Successfully!!");
